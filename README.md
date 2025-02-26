@@ -1,8 +1,6 @@
-steps to run:
-
+Setup Instructions
 
 Prereq:
-
 
 1)
 Install node.js
