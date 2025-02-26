@@ -7,6 +7,7 @@ import SignupScreen from "../screens/SignupScreen";
 import TabNavigator from "./TabNavigator";
 import WorkoutDetailsScreen from "../components/Work/WorkoutDetailsScreen";
 import CameraWorkoutTracker from "../components/Work/CameraWorkoutTracker";
+import CreateAccount from "../screens/CreateAccount";
 
 const Stack = createStackNavigator();
 
@@ -16,7 +17,8 @@ const StackNavigator = () => {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="GetStarted" component={GetStarted} />
         <Stack.Screen name="Signup" component={SignupScreen} />
-        <Stack.Screen name="MainApp" component={TabNavigator} />
+        <Stack.Screen name="CreateAccount" component={CreateAccount} />
+        <Stack.Screen name="MainApp" component={TabNavigator}/>
 
         {/*WITHIN HOME SCREEN, stack sscreens are there , adding it */}
         {/* 1.Workout details */}

@@ -1,14 +1,14 @@
 import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
 import React from "react";
 
-const WorkoutPlanCard = ({ title, image, subtitle, onPress }) => {
+const ExerciseCard = ({ title, image, subtitle, onPress }) => {
   console.log("text ", image);
   return (
     <View style={styles.card}>
       <Image source={image} style={styles.image} />
       <View style={styles.textContainer}>
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.subtitle}>{subtitle}</Text>
+        {/* <Text style={styles.subtitle}>{subtitle}</Text> */}
       </View>
       <TouchableOpacity style={styles.goButton} onPress={onPress}>
         <Text style={styles.goText}>GO</Text>
@@ -17,26 +17,29 @@ const WorkoutPlanCard = ({ title, image, subtitle, onPress }) => {
   );
 };
 
-export default WorkoutPlanCard;
+export default ExerciseCard;
 
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fff",
-    borderRadius: 10,
+    borderRadius: 16,
     overflow: "hidden",
-    marginBottom: 35,
+    marginBottom: 10,
     marginLeft: 3,
     marginRight: 3,
+    width:150,
+    // borderWidth:1
   },
   image: {
     width: "100%",
-    height: 170,
+    height: "100%",
     resizeMode: "cover",
   },
   textContainer: {
     padding: 10,
     position:"absolute",
-    bottom:2
+    bottom:2,
+    // backgroundColor:"red"
 
   },
   title: {

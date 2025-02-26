@@ -2,8 +2,7 @@ import React , { useState } from "react";
 import { View, Text,Image, Button, TextInput,StyleSheet, TouchableOpacity } from "react-native";
 import axios from "axios";
 
-
-const SignupScreen = ({ navigation }) => {
+const CreateAccount = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -12,24 +11,24 @@ const SignupScreen = ({ navigation }) => {
   const handleLogin = async () => {
     console.log("Email: ",email," password: ",password)
     try {
-      const response = await axios.post("http://localhost:5000/login", {
+      const response = await axios.post("http://localhost:5000/signup", {
         email,
         password,
       });
 
-      if (response.data.message === "Login successful") {
+      if (response.data.message === "User registered successfully") {
         navigation.replace("MainApp"); // Navigate to MainApp if login is successful
       }
     } catch (error) {
       console.log("error ",error)
-      Alert.alert("Login Failed", error.response?.data?.error || "Something went wrong");
+      Alert.alert("Signup Failed", error.response?.data?.error || "Something went wrong");
     }
   };
  
  
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Sign In</Text>
+      <Text style={styles.title}>Create Account</Text>
       <TouchableOpacity style={styles.backButton}>
         <Image style={styles.backButtonIcon} source={require("../../assets/GoBack.png")}></Image>
       </TouchableOpacity>
@@ -61,13 +60,13 @@ const SignupScreen = ({ navigation }) => {
 
       <View style={styles.centerContainer}>
       <TouchableOpacity style={styles.signInButton} onPress={handleLogin}>
-        <Text style={styles.signInText}>Sign In</Text>
+        <Text style={styles.signInText}>Create Account</Text>
       </TouchableOpacity>
       </View>
 
       <View style={styles.createAccountContainer}>
         <Text style={styles.createAccountText}>Don't have an account yet?</Text>
-        <TouchableOpacity style={styles.createAccountButton} onPress={()=>{navigation.replace("CreateAccount")}}>
+        <TouchableOpacity style={styles.createAccountButton}>
           <Text style={styles.createAccountButtonText}>Create Account</Text>
         </TouchableOpacity>
       </View>
@@ -177,4 +176,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default SignupScreen;
+export default CreateAccount;
