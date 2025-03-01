@@ -6,10 +6,22 @@ import bicep from "../../assets/bicep.jpg";
 import pushup from "../../assets/pushup.webp";
 import squat from "../../assets/squat.jpg";
 import lunges from "../../assets/lunges.jpg";
+import plank from "../../assets/plank.jpg";
+import shoulder_press from "../../assets/shoulder_press.jpg";
+import lateral_raise from "../../assets/lateral_raise.jpg";
+
+// This is the home screen
+// ----3 components------
+// contains upper body exercise
+// lower body exercise
+// Exercise library
 
 const HomeScreen = ({ navigation }) => {
   const workouts = [
     { name: "Bicep Curl", duration: "15 min", image: bicep },
+    { name: "plank", duration: "15 min", image: plank },
+    { name: "shoulder_press", duration: "15 min", image: shoulder_press },
+    { name: "lateral_raise", duration: "15 min", image: lateral_raise },
     { name: "Push-Ups", duration: "15 min", image: pushup },
     { name: "Squats", duration: "15 min", image: squat },
     { name: "Lunges", duration: "15 min", image: lunges },
@@ -47,15 +59,14 @@ const HomeScreen = ({ navigation }) => {
       />
 
       <Text style={styles.title}>Exercise Library</Text>
-      
+
       <ScrollView
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
         {workouts.map((workout, index) => (
-         
-         <ExerciseCard
+          <ExerciseCard
             key={index}
             image={workout.image}
             title={workout.name}
@@ -63,7 +74,9 @@ const HomeScreen = ({ navigation }) => {
             onPress={() => {
               triggerHaptic();
               console.log(`Go to ${workout.name} Workouts!`);
-              navigation.navigate("WorkoutTracker");
+              navigation.navigate("WorkoutTracker", {
+                workoutName: workout.name,
+              });
             }}
             style={styles.exerciseCard} // Added style prop for individual cards
           />

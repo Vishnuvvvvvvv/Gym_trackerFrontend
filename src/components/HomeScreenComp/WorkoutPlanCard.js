@@ -1,6 +1,9 @@
 import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
 import React from "react";
 
+// This card is used as a component inside
+// the home screen : for upper body & lower body section inside the home screen
+
 const WorkoutPlanCard = ({ title, image, subtitle, onPress }) => {
   console.log("text ", image);
   return (
@@ -35,15 +38,14 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     padding: 10,
-    position:"absolute",
-    bottom:2
-
+    position: "absolute",
+    bottom: 2,
   },
   title: {
     fontSize: 18,
     fontWeight: "bold",
-    color:"white",
-    marginBottom:3,
+    color: "white",
+    marginBottom: 3,
   },
   subtitle: {
     fontSize: 14,

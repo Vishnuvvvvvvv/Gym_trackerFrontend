@@ -16,6 +16,13 @@ import pushup from "../../../assets/pushup.webp";
 import squat from "../../../assets/squat.jpg";
 import lunges from "../../../assets/lunges.jpg";
 import CircledRight from "../../../assets/CircledRight.png";
+import plank from "../../../assets/plank.jpg";
+import shoulder_press from "../../../assets/shoulder_press.jpg";
+import lateral_raise from "../../../assets/lateral_raise.jpg";
+
+// This is the "WorkoutDetails" screen.
+// Within the home screen when upper body workouts or lower body workout section gets clicked ,
+// this is the page which gets rendered...
 
 const WorkoutDetailsScreen = ({ navigation }) => {
   const route = useRoute();
@@ -24,11 +31,15 @@ const WorkoutDetailsScreen = ({ navigation }) => {
   const workouts = {
     "upper-body": [
       { name: "Bicep Curl", duration: "15 min", image: bicep },
+      { name: "plank", duration: "15 min", image: plank },
+      { name: "shoulder_press", duration: "15 min", image: shoulder_press },
+      { name: "lateral_raise", duration: "15 min", image: lateral_raise },
       { name: "Push-Ups", duration: "15 min", image: pushup },
     ],
     "lower-body": [
       { name: "Squats", duration: "15 min", image: squat },
       { name: "Lunges", duration: "15 min", image: lunges },
+      { name: "plank", duration: "15 min", image: plank },
     ],
   };
 
@@ -59,7 +70,9 @@ const WorkoutDetailsScreen = ({ navigation }) => {
               style={styles.RightIconBtn}
               onPress={() => {
                 console.log("going to camera workout tracker");
-                navigation.navigate("WorkoutTracker");
+                navigation.navigate("WorkoutTracker", {
+                  workoutName: workout.name,
+                });
               }}
             >
               <Image style={styles.RightIcon} source={CircledRight}></Image>
@@ -92,7 +105,8 @@ const styles = StyleSheet.create({
     borderRadius: 42,
     padding: 30,
     paddingTop: 50,
-    height: "100%",
+
+    height: "65%",
     backgroundColor: "white",
     zIndex: 1,
     position: "absolute",
