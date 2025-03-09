@@ -1,6 +1,9 @@
 import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
 import React from "react";
 
+// This card is used in home screen 
+// to render the Exercise's under the section "Exercise library "  
+
 const ExerciseCard = ({ title, image, subtitle, onPress }) => {
   console.log("text ", image);
   return (

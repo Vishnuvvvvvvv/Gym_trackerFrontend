@@ -1,10 +1,20 @@
 import { useRoute } from "@react-navigation/native";
 import React, { useState, useEffect } from "react";
-import { Dimensions, StyleSheet, View, Text, ScrollView } from "react-native";
+import {
+  Dimensions,
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Modal,
+} from "react-native";
 import WebView from "react-native-webview";
 
+// import back from "../../../assets/GoBack.png";
 // This is the WorkoutTracker page
-// When any of the exercise under the Upper body/lower body workout gets selected, then this page is rendered
+// When any of the exercise under the Upper body/lower body workout/ExerciseLibrary gets selected, then this page is rendered
 // Workout details for each exercise
 const workoutDetails = {
   bicep_curl: {
@@ -65,12 +75,21 @@ const workoutDetails = {
   },
 };
 
-export default function CameraWorkoutTracker() {
+export default function CameraWorkoutTracker({ navigation }) {
   const route = useRoute();
 
   const [timeElapsed, setTimeElapsed] = useState(0); // State for elapsed time
   const [aiFeedback, setAiFeedback] = useState("Analyzing form..."); // State for AI feedback
   const [workoutName, setWorkoutName] = useState("bicep_curl"); // Default workout name
+  const [timerId, setTimerId] = useState(null); // Store timer ID to clear it later
+
+  // Request camera permission
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === "granted");
+    })();
+  }, []);
 
   var { workoutName: routeWorkoutName = "bicep_curl" } = route.params || {}; // Default to "bicep_curl" if not provided
   if (routeWorkoutName === "Bicep Curl") {
@@ -86,15 +105,64 @@ export default function CameraWorkoutTracker() {
   }
   console.log("Received workout name:", routeWorkoutName);
 
-  // Timer for elapsed time
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeElapsed((prev) => prev + 1);
-    }, 1000);
-    return () => clearInterval(timer); // Cleanup on unmount
-  }, []);
+  const [countdown, setCountdown] = useState(10);
+  const [showCountdown, setShowCountdown] = useState(false);
 
-  // Format time elapsed (MM:SS)
+  useEffect(() => {
+    let countdownInterval;
+    if (showCountdown) {
+      countdownInterval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev === 1) {
+            clearInterval(countdownInterval);
+            setShowCountdown(false);
+            // setStart(true);
+            startTimer();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(countdownInterval);
+  }, [showCountdown]);
+
+  const startCountDown = () => {
+    setCountdown(10);
+    setShowCountdown(true);
+  };
+
+  // Start timer function
+  const startTimer = () => {
+    if (!timerId) {
+      // Only start if no timer is running
+      const id = setInterval(() => {
+        setTimeElapsed((prev) => prev + 1);
+      }, 1000);
+      setTimerId(id);
+      setStart(true);
+    }
+  };
+
+  // Reset timer function
+  const resetTimer = () => {
+    if (timerId) {
+      clearInterval(timerId);
+      setTimerId(null);
+    }
+    setStart(false);
+    setTimeElapsed(0);
+  };
+
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      if (timerId) {
+        clearInterval(timerId);
+      }
+    };
+  }, [timerId]);
+
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -112,40 +180,98 @@ export default function CameraWorkoutTracker() {
   };
 
   // WebView URI with error handling
-  const webViewUri = `https://jolly-naiad-67bb4a.netlify.app/?workout=${encodeURIComponent(
+  const webViewUri = `https://beautiful-bublanina-89a0bf.netlify.app/?workout=${encodeURIComponent(
     routeWorkoutName || "bicep_curl"
   )}`;
   console.log("WebView URI:", webViewUri);
 
+  const [start, setStart] = useState(false);
+
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => {
+          navigation.goBack();
+        }}
+      >
+        {/* <Text>GoBack</Text> */}
+        <Image
+          style={styles.backButtonIcon}
+          source={require("../../../assets/GoBack.png")}
+        ></Image>
+      </TouchableOpacity>
+
       <WebView
         source={{ uri: webViewUri }}
         style={styles.webview}
-        allowsInlineMediaPlayback // For camera to work
-        mediaPlaybackRequiresUserAction={false} // Auto-allow camera
+        // allowsInlineMediaPlayback // For camera to work
+        // mediaPlaybackRequiresUserAction={false} // Auto-allow camera
+        // onMessage={handleWebViewMessage}
+        // onLoad={() => console.log("WebView loaded successfully")}
+        // onError={(syntheticEvent) => {
+        //   const { nativeEvent } = syntheticEvent;
+        //   console.error("WebView error:", nativeEvent);
+        //   setWorkoutName("bicep_curl"); // Fallback to default if URL fails
+        // }}
+
+        allowsInlineMediaPlayback={true}
+        mediaPlaybackRequiresUserAction={false}
+        javaScriptEnabled={true}
+        javaScriptEnabledAndroid={true}
+        originWhitelist={["*"]}
+        scalesPageToFit={true}
+        userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"
         onMessage={handleWebViewMessage}
         onLoad={() => console.log("WebView loaded successfully")}
         onError={(syntheticEvent) => {
           const { nativeEvent } = syntheticEvent;
           console.error("WebView error:", nativeEvent);
-          setWorkoutName("bicep_curl"); // Fallback to default if URL fails
+          setWorkoutName("bicep_curl");
         }}
       />
 
       {/* Bottom Components */}
       <ScrollView style={styles.bottomContainer}>
-        {/* Time Elapsed */}
-        <View style={styles.timeElapsed}>
-          <Text style={styles.timeText}>Time Elapsed</Text>
-          <Text style={styles.timeValue}>{formatTime(timeElapsed)}</Text>
-        </View>
+        {!start ? (
+          <View style={styles.timeElapsed}>
+            <TouchableOpacity style={styles.timeText} onPress={startCountDown}>
+              <View style={styles.startText}>
+                <Text style={{ fontWeight: "bold" }}>Start</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.timeElapsed}>
+            <Text style={styles.timeText}>Time Elapsed</Text>
+            <Text style={styles.timeValue}>{formatTime(timeElapsed)}</Text>
+
+            <TouchableOpacity style={styles.resetView} onPress={resetTimer}>
+              {/* <Image
+                source={require("../../../assets/Reset.png")}
+                style={styles.resetIcon}
+              /> */}
+              <Text>Reset</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Countdown Popup */}
+        <Modal transparent={true} visible={showCountdown} animationType="fade">
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.countdownText}>{countdown}</Text>
+            </View>
+          </View>
+        </Modal>
 
         {/* AI Feedback */}
-        <View style={styles.aiAnalysis}>
-          <Text style={styles.sectionTitle}>AI Analysis</Text>
-          <Text style={styles.analysisText}>Form Analysis: {aiFeedback}</Text>
-        </View>
+        {start && (
+          <View style={styles.aiAnalysis}>
+            <Text style={styles.sectionTitle}>AI Analysis</Text>
+            <Text style={styles.analysisText}>Form Analysis: {aiFeedback}</Text>
+          </View>
+        )}
 
         {/* Workout Details */}
         <View style={styles.workoutDetails}>
@@ -186,35 +312,61 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 40, // Adjust for status bar if needed
     backgroundColor: "#f0f0f0",
+    height: "100%",
   },
   webview: {
     width: "100%", // Full width
-    height: Dimensions.get("window").height / 2,
+    // height: Dimensions.get("window").height / 2,
+    // height: "40%",
+    flex: 0.4,
+  },
+  backButton: {
+    // borderWidth:1,
+    // width:10,
+    // height:10,
+
+    position: "absolute",
+    top: 10,
+    left: 10,
+    zIndex: 999,
+  },
+  backButtonIcon: {
+    width: 40,
+    height: 40,
   },
   bottomContainer: {
-    flex: 1,
+    // flex: 1,
     padding: 10,
     backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    // borderTopLeftRadius: 20,
+    // borderTopRightRadius: 20,
     elevation: 5, // Shadow for Android
     shadowColor: "#000", // Shadow for iOS
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     position: "absolute",
-    top: "40%",
+    top: "35%",
+    height: "65%",
+    // height: Dimensions.get("window").height / 2,
+    width: "100%",
   },
   timeElapsed: {
+    // flex: 0.2,
     padding: 10,
-    backgroundColor: "#e0e0e0",
+    backgroundColor: "#fff",
     borderRadius: 10,
     marginBottom: 10,
     justifyContent: "center",
     alignItems: "center",
+    position: "relative",
+    marginTop: 5,
+
+    // height: "10%",
   },
   timeText: {
     fontSize: 14,
+    fontWeight: "bold",
     color: "#333",
   },
   timeValue: {
@@ -232,6 +384,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+    marginTop: 5,
+    // height: "20%",
+    // flex: 0.3,
   },
   sectionTitle: {
     fontSize: 18,
@@ -244,6 +399,7 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   workoutDetails: {
+    // flex: 2,
     padding: 15,
     backgroundColor: "#fff",
     borderRadius: 10,
@@ -252,6 +408,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+    // minHeight: "70%",
+    // position: "realtive",
+    // bottom: 1,
+    marginTop: 5,
   },
   detailsRow: {
     flexDirection: "row",
@@ -278,5 +438,56 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     marginBottom: 5,
+  },
+
+  resetIcon: {
+    width: 20,
+    height: 20,
+  },
+  resetView: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    width: 220, // Circular size
+    height: 220, // Circular size
+    borderRadius: 110, // Half of width/height to make it a circle
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5, // Shadow for Android
+    shadowColor: "#000", // Shadow for iOS
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    borderColor: "red",
+    borderWidth: 10,
+  },
+  countdownText: {
+    fontSize: 67,
+    fontWeight: "bold",
+    color: "red",
+  },
+  startText: {
+    width: 90, // Circular size
+    height: 90, // Circular size
+    borderRadius: 60, // Half of width/height to make it a circle
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5, // Shadow for Android
+    shadowColor: "#000", // Shadow for iOS
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    borderColor: "red",
+    borderWidth: 10,
   },
 });

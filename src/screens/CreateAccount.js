@@ -20,12 +20,13 @@ const CreateAccount = ({ navigation }) => {
   const handleLogin = async () => {
     console.log("Email: ", email, " password: ", password);
     try {
-      const response = await axios.post(`http://${backendIp}:7000/signup`, {
+      const response = await axios.post(`${backendIp}/api/signup`, {
         email,
         password,
       });
 
       if (response.data.message === "User registered successfully") {
+        await AsyncStorage.setItem("authToken", response.data.token);
         navigation.replace("MainApp"); // Navigate to MainApp if login is successful
       }
     } catch (error) {
@@ -40,7 +41,12 @@ const CreateAccount = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Account</Text>
-      <TouchableOpacity style={styles.backButton}>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => {
+          navigation.goBack();
+        }}
+      >
         <Image
           style={styles.backButtonIcon}
           source={require("../../assets/GoBack.png")}

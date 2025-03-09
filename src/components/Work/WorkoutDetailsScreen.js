@@ -59,7 +59,14 @@ const WorkoutDetailsScreen = ({ navigation }) => {
         source={workoutType === "upper-body" ? upperBody : lowerBody}
       />
 
-      <ScrollView style={styles.scrollView}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={{
+          alignItems: "center",
+          justifyContent: "center",
+          paddingBottom: 50,
+        }}
+      >
         {workouts[workoutType].map((workout, index) => (
           <View key={index} style={styles.card}>
             <Image style={styles.indImg} source={workout.image}></Image>
@@ -89,37 +96,37 @@ const styles = StyleSheet.create({
     flex: 1, // Takes full height of the screen
     // justifyContent: "center", // Centers vertically
     alignItems: "center", // Centers horizontally
-    padding: 10,
+    // padding: 10,
   },
   goBack: {
     position: "absolute",
-    left: 10,
-    top: 10,
+    left: 5,
+    top: 20,
     color: "white",
     zIndex: 1, // Ensures it's on top
-    width: 25,
-    height: 25,
+    width: 35,
+    height: 35,
   },
   scrollView: {
     width: "99%",
     borderRadius: 42,
-    padding: 30,
-    paddingTop: 50,
-
-    height: "65%",
+    // padding: 30,
+    paddingTop: 30,
+    paddingBottom: 30,
+    height: "68%",
     backgroundColor: "white",
     zIndex: 1,
     position: "absolute",
-    top: "39%",
+    top: "35%",
   },
   card: {
     backgroundColor: "#fff",
     borderRadius: 10,
     // borderWidth: 1,
     position: "relative",
-    marginBottom: 25,
+    marginBottom: 15,
 
-    width: "100%",
+    width: "90%",
   },
   image: {
     width: "98%", // Full screen width
@@ -131,7 +138,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     resizeMode: "cover",
-    height: 100,
+    height: 130,
     borderRadius: 12,
   },
   text1: {

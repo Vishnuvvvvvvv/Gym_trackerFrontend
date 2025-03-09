@@ -1,33 +1,33 @@
-import { StyleSheet, Text, TouchableOpacity, View , Image} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
 import React from "react";
 
 const GetStarted = ({ navigation }) => {
   return (
     <View style={styles.container}>
-
       {/* Logo */}
-       <Image
-        source={require("./../../assets/icon.png")} style={styles.logo} />
-     
-       {/* App Name */}
-       <Text style={styles.title}>
+      <Image source={require("./../../assets/icon.png")} style={styles.logo} />
+
+      {/* App Name */}
+      <Text style={styles.title}>
         Form<Text style={styles.highlight}>Fix</Text>
       </Text>
-     
 
-     <View style={styles.downContainer}>
-     
-      <TouchableOpacity style={styles.button} onPress={() => navigation.push("Signup")}>
-        <Text style={styles.buttonText}>Get Started</Text>
-      </TouchableOpacity>
+      <View style={styles.downContainer}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.push("Signup")}
+        >
+          <Text style={styles.buttonText}>Get Started</Text>
+        </TouchableOpacity>
 
         {/* Sign-In Link */}
-        <TouchableOpacity style={styles.signInText} onPress={() => navigation.push("Signup")}>
-         <Text style={styles.signInLink}>Already a member? Sign In</Text>
-       </TouchableOpacity>
-
-
-</View>
+        <TouchableOpacity
+          style={styles.signInText}
+          onPress={() => navigation.push("Signup")}
+        >
+          <Text style={styles.signInLink}>Already a member? Sign In</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -44,19 +44,19 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     marginBottom: 20,
-    borderRadius:12,
+    borderRadius: 12,
   },
   title: {
     fontSize: 32,
     fontWeight: "bold",
     color: "#000",
   },
-  downContainer:{
-    position:"relative",
+  downContainer: {
+    position: "relative",
     // borderWidth:1,
-    top:"30%",
-    justifyContent:"center",
-    alignItems:"center"
+    top: "30%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   highlight: {
     color: "#E63946", // Red color for "Fix"

@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import axios from "axios";
 import { backendIp } from "../../apiConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SignupScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -18,16 +19,17 @@ const SignupScreen = ({ navigation }) => {
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const handleLogin = async () => {
-    console.log(`http://${backendIp}:7000/login`);
+    console.log(`${backendIp}/api/login`);
     navigation.replace("MainApp");
     console.log("Email: ", email, " password: ", password);
     try {
-      const response = await axios.post(`http://${backendIp}:7000/login`, {
+      const response = await axios.post(`${backendIp}/api/login`, {
         email,
         password,
       });
 
       if (response.data.message === "Login successful") {
+        await AsyncStorage.setItem("authToken", response.data.token);
         navigation.replace("MainApp"); // Navigate to MainApp if login is successful
       }
     } catch (error) {
@@ -42,7 +44,12 @@ const SignupScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Sign In</Text>
-      <TouchableOpacity style={styles.backButton}>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => {
+          navigation.goBack();
+        }}
+      >
         <Image
           style={styles.backButtonIcon}
           source={require("../../assets/GoBack.png")}
