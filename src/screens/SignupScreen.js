@@ -7,6 +7,7 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import axios from "axios";
 import { backendIp } from "../../apiConfig";
@@ -20,7 +21,7 @@ const SignupScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     console.log(`${backendIp}/api/login`);
-    navigation.replace("MainApp");
+    // navigation.replace("MainApp");
     console.log("Email: ", email, " password: ", password);
     try {
       const response = await axios.post(`${backendIp}/api/login`, {
@@ -34,10 +35,17 @@ const SignupScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.log("error ", error);
-      Alert.alert(
-        "Login Failed",
-        error.response?.data?.error || "Something went wrong"
-      );
+
+      let errorMessage = "An unexpected error occurred"; // Default message
+
+      if (error.response) {
+        // Extract the error message from the response
+        errorMessage = error.response.data.error || "Failed to save changes";
+      } else if (error.message) {
+        errorMessage = error.message; // Handle generic network errors
+      }
+
+      Alert.alert("Login failed", errorMessage);
     }
   };
 

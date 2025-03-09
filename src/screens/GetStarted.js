@@ -15,7 +15,7 @@ const GetStarted = ({ navigation }) => {
       <View style={styles.downContainer}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.push("Signup")}
+          onPress={() => navigation.navigate("Onboarding")}
         >
           <Text style={styles.buttonText}>Get Started</Text>
         </TouchableOpacity>
@@ -23,7 +23,7 @@ const GetStarted = ({ navigation }) => {
         {/* Sign-In Link */}
         <TouchableOpacity
           style={styles.signInText}
-          onPress={() => navigation.push("Signup")}
+          onPress={() => navigation.navigate("Signup")}
         >
           <Text style={styles.signInLink}>Already a member? Sign In</Text>
         </TouchableOpacity>

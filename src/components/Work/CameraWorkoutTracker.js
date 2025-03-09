@@ -9,8 +9,10 @@ import {
   TouchableOpacity,
   Image,
   Modal,
+  Alert,
 } from "react-native";
 import WebView from "react-native-webview";
+import * as Speech from "expo-speech";
 
 // import back from "../../../assets/GoBack.png";
 // This is the WorkoutTracker page
@@ -18,7 +20,7 @@ import WebView from "react-native-webview";
 // Workout details for each exercise
 const workoutDetails = {
   bicep_curl: {
-    target: "15 min",
+    target: "2 min",
     instructions: [
       "1. Stand with feet shoulder-width apart, holding dumbbells.",
       "2. Curl the weights while keeping elbows close to your body.",
@@ -26,7 +28,7 @@ const workoutDetails = {
     ],
   },
   squat: {
-    target: "20 reps",
+    target: "10 sec",
     instructions: [
       "1. Stand with feet hip-width apart.",
       "2. Bend knees and hips, lowering your body as if sitting back.",
@@ -34,7 +36,7 @@ const workoutDetails = {
     ],
   },
   plank: {
-    target: "60 seconds",
+    target: "60 sec",
     instructions: [
       "1. Get into a forearm plank position, body straight.",
       "2. Hold your body tight, engaging core and glutes.",
@@ -42,7 +44,7 @@ const workoutDetails = {
     ],
   },
   push_up: {
-    target: "20 reps",
+    target: "20 min",
     instructions: [
       "1. Start in a plank position with hands shoulder-width apart.",
       "2. Lower your body until chest nearly touches the ground.",
@@ -50,7 +52,7 @@ const workoutDetails = {
     ],
   },
   shoulder_press: {
-    target: "12 reps",
+    target: "12 min",
     instructions: [
       "1. Sit or stand with dumbbells at shoulder height.",
       "2. Press the weights overhead until arms are extended.",
@@ -58,7 +60,7 @@ const workoutDetails = {
     ],
   },
   lateral_raise: {
-    target: "15 reps",
+    target: "15 min",
     instructions: [
       "1. Stand with feet shoulder-width apart, holding dumbbells.",
       "2. Raise arms to the sides until parallel with the floor.",
@@ -66,7 +68,7 @@ const workoutDetails = {
     ],
   },
   lunges: {
-    target: "15 reps per leg",
+    target: "15 min",
     instructions: [
       "1. Stand tall with feet hip-width apart.",
       "2. Step forward with one leg, lowering your hips until both knees are bent at about 90 degrees.",
@@ -107,50 +109,134 @@ export default function CameraWorkoutTracker({ navigation }) {
 
   const [countdown, setCountdown] = useState(10);
   const [showCountdown, setShowCountdown] = useState(false);
+  const [isWorkoutActive, setIsWorkoutActive] = useState(false);
+
+  const getTargetTimeInSeconds = (target) => {
+    if (!target) return Infinity; // Return Infinity if no target (to prevent finishing)
+
+    const timeParts = target.split(" ");
+    const value = parseInt(timeParts[0]);
+
+    if (timeParts[1].includes("min")) {
+      return value * 60; // Convert minutes to seconds
+    } else if (timeParts[1].includes("sec")) {
+      return value; // Already in seconds
+    }
+    return Infinity; // Default case
+  };
+
+  // Show Alert When Workout Ends
+  const finishWorkout = () => {
+    setIsWorkoutActive(false);
+    if (timerId) {
+      clearInterval(timerId);
+      setTimerId(null);
+    }
+    Speech.speak("Workout finished!");
+    Alert.alert("Workout Complete", "You have achieved your target!", [
+      { text: "OK", onPress: resetTimer },
+    ]);
+  };
 
   useEffect(() => {
-    let countdownInterval;
-    if (showCountdown) {
-      countdownInterval = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev === 1) {
-            clearInterval(countdownInterval);
-            setShowCountdown(false);
-            // setStart(true);
-            startTimer();
-            return 0;
-          }
-          return prev - 1;
+    const speakAndCountDown = async () => {
+      for (let i = countdown; i > 0; i--) {
+        await new Promise((resolve) => {
+          Speech.speak(i.toString(), {
+            onDone: resolve, // Wait for speech to finish before continuing
+          });
         });
-      }, 1000);
+
+        setCountdown(i - 1);
+      }
+
+      // After countdown ends, speak "Go!"
+      await new Promise((resolve) => {
+        Speech.speak("Go!", {
+          onDone: resolve,
+        });
+      });
+
+      setShowCountdown(false);
+      startTimer();
+    };
+
+    if (showCountdown) {
+      speakAndCountDown();
     }
-    return () => clearInterval(countdownInterval);
   }, [showCountdown]);
 
   const startCountDown = () => {
     setCountdown(10);
+    setIsWorkoutActive(true);
     setShowCountdown(true);
   };
 
   // Start timer function
+  // const startTimer = () => {
+  //   if (!timerId) {
+  //     const targetSeconds = getTargetTimeInSeconds(workoutDetails[routeWorkoutName]?.target);
+  //     // Only start if no timer is running
+  //     const id = setInterval(() => {
+  //       setTimeElapsed((prev) => prev + 1);
+  //     }, 1000);
+  //     setTimerId(id);
+  //     setStart(true);
+  //   }
+  // };
+
   const startTimer = () => {
     if (!timerId) {
-      // Only start if no timer is running
+      console.log(workoutDetails[routeWorkoutName]?.target, " =>target time");
+
+      const targetSeconds = getTargetTimeInSeconds(
+        workoutDetails[routeWorkoutName]?.target
+      );
+      console.log(targetSeconds);
       const id = setInterval(() => {
-        setTimeElapsed((prev) => prev + 1);
+        setTimeElapsed((prev) => {
+          const newTime = prev + 1;
+          // Check if target time is reached
+          console.log(
+            "target time : ",
+            targetSeconds,
+            "new time: ",
+            newTime,
+            " setIsWorkoutActive ",
+            isWorkoutActive
+          );
+          if (newTime >= targetSeconds && isWorkoutActive) {
+            finishWorkout();
+            clearInterval(id); // Stop the timer
+            setTimerId(null);
+            return prev; // Don't increment past target
+          }
+          return newTime;
+        });
       }, 1000);
       setTimerId(id);
       setStart(true);
+      // setIsWorkoutActive(true); // Start the workout
     }
   };
 
   // Reset timer function
+  // const resetTimer = () => {
+  //   if (timerId) {
+  //     clearInterval(timerId);
+  //     setTimerId(null);
+  //   }
+  //   setStart(false);
+  //   setTimeElapsed(0);
+  // };
+
   const resetTimer = () => {
     if (timerId) {
       clearInterval(timerId);
       setTimerId(null);
     }
     setStart(false);
+    setIsWorkoutActive(false);
     setTimeElapsed(0);
   };
 
@@ -411,6 +497,8 @@ const styles = StyleSheet.create({
     // minHeight: "70%",
     // position: "realtive",
     // bottom: 1,
+    // borderWidth: 2,
+    height: "85%",
     marginTop: 5,
   },
   detailsRow: {
@@ -431,8 +519,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "#333",
-    marginTop: 10,
-    marginBottom: 5,
+    marginTop: 30,
+    marginBottom: 10,
   },
   instructionText: {
     fontSize: 14,

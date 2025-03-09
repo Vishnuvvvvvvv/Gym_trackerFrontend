@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Alert, Linking } from "react-native";
 import {
   View,
   Text,
@@ -13,7 +14,7 @@ import axios from "axios";
 import { backendIp } from "../../apiConfig";
 
 export default function ProfilePage({ navigation }) {
-  const [displayName, setDisplayName] = useState("Beloved"); // Default display name
+  const [displayName, setDisplayName] = useState("user"); // Default display name
   const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
   const [tempName, setTempName] = useState(""); // Temporary state for input
   const [newPassword, setNewPassword] = useState("");
@@ -55,6 +56,7 @@ export default function ProfilePage({ navigation }) {
 
   // Function to save the edited profile
   const save = async () => {
+    setChangePassword(!changePassword);
     try {
       const userToken = await AsyncStorage.getItem("authToken");
       let updatesMade = false;
@@ -112,13 +114,19 @@ export default function ProfilePage({ navigation }) {
         console.log("No updates were made - no fields filled");
       }
     } catch (error) {
-      console.error("Error saving profile:", error);
+      console.error("Error saving the profile :", error);
+
+      // Extract meaningful error message
+      let errorMessage = "An unexpected error occurred"; // Default message
 
       if (error.response) {
-        setError(error.response.data.message || "Failed to save changes");
-      } else {
-        setError("Network error occurred");
+        errorMessage = error.response.data.message || "Failed to save changes";
+      } else if (error.message) {
+        errorMessage = error.message; // Handle generic network errors
       }
+
+      Alert.alert("Updating profile failed", errorMessage);
+      setError(errorMessage); // Update error state
     }
   };
 
@@ -128,34 +136,70 @@ export default function ProfilePage({ navigation }) {
       await AsyncStorage.clear(); // Clear all AsyncStorage data
       console.log("AsyncStorage cleared successfully");
       setDisplayName("User"); // Reset display name to default
-      navigation.replace("Signup"); // Navigate to Signup screen
+      navigation.replace("GetStarted");
     } catch (error) {
       console.error("Error clearing AsyncStorage:", error);
       // Still navigate even if clearing fails, to ensure logout proceeds
-      navigation.replace("Signup");
+      navigation.replace("GetStarted");
     }
   };
 
-  // Navigation options with icons and labels
+  // Function for "About Us"
+  const handleAboutUs = () => {
+    Alert.alert(
+      "About Us",
+      "FormFix is a fitness app designed to help users optimize their workouts and maintain proper exercise form."
+    );
+  };
+
+  // Function for "Support Center"
+  const handleSupportCenter = () => {
+    Alert.alert(
+      "Support Center",
+      "Need help? Reach out to our support team at:\n\nEmail: exerciseappsupport@gmail.com"
+    );
+  };
+
+  // Function for "Contact Us"
+  const handleContactUs = () => {
+    Alert.alert(
+      "Contact Us",
+      "For any queries, contact our administrators:\n\n" +
+        "📞 Vivek S: 75609 37769\n" +
+        "📞 Harikrishna J: 884 881 5184\n" +
+        "📞 Alfred Shyjo: 79941 67767\n\n" +
+        "📧 Email: exerciseappsupport@gmail.com",
+      [
+        {
+          text: "Email Us",
+          onPress: () => Linking.openURL("mailto:exerciseappsupport@gmail.com"),
+        },
+        { text: "OK", style: "cancel" },
+      ]
+    );
+  };
+
+  // Update the menu items with the functions
   const menuItems = [
     { title: "Edit profile", icon: "person", onPress: handleEditProfile },
-    { title: "Workout Preferences", icon: "fitness-center" },
-    { title: "About Us", icon: "info" },
-    { title: "Support Center", icon: "help" },
-    { title: "Contact Us", icon: "email" },
+    // { title: "Workout Preferences", icon: "fitness-center" },
+    { title: "About Us", icon: "info", onPress: handleAboutUs },
+    { title: "Support Center", icon: "help", onPress: handleSupportCenter },
+    { title: "Contact Us", icon: "email", onPress: handleContactUs },
     { title: "Share FormFix App", icon: "share" },
   ];
 
+  const [changePassword, setChangePassword] = useState(false);
   //
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Hello.</Text>
-      </View>
+      {/* <View style={styles.header}>
+        <Text style={styles.headerText}>Hello </Text>
+      </View> */}
 
       {/* Display Name */}
-      <Text style={styles.displayName}>{displayName}</Text>
+      <Text style={styles.displayName}>Hello {displayName}</Text>
 
       {/* Thank You Message */}
       <View style={styles.thankYouContainer}>
@@ -201,7 +245,9 @@ export default function ProfilePage({ navigation }) {
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => {
+          setModalVisible(false);
+        }}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
@@ -210,30 +256,46 @@ export default function ProfilePage({ navigation }) {
               style={styles.input}
               value={tempName}
               onChangeText={setTempName}
-              placeholder="Enter your username"
-              placeholderTextColor="#888"
-            />
-            <TextInput
-              style={styles.input}
-              value={oldPassword}
-              onChangeText={setOldPassword}
-              placeholder="Old password"
-              placeholderTextColor="#888"
-              secureTextEntry
-            />
-
-            <TextInput
-              style={styles.input}
-              value={newPassword}
-              onChangeText={setNewPassword}
-              placeholder="Update password"
+              placeholder="Enter new username"
               placeholderTextColor="#888"
             />
 
+            <TouchableOpacity
+              onPress={() => {
+                setChangePassword(!changePassword);
+              }}
+            >
+              <Text style={{ color: "blue", marginBottom: 10 }}>
+                {changePassword ? "" : "Change Password"}
+              </Text>
+            </TouchableOpacity>
+
+            {changePassword && (
+              <>
+                <TextInput
+                  style={styles.input}
+                  value={oldPassword}
+                  onChangeText={setOldPassword}
+                  placeholder="Old password"
+                  placeholderTextColor="#888"
+                  secureTextEntry
+                />
+
+                <TextInput
+                  style={styles.input}
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  placeholder="New password"
+                  placeholderTextColor="#888"
+                />
+              </>
+            )}
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={styles.modalButton}
-                onPress={() => setModalVisible(false)}
+                onPress={() => {
+                  setModalVisible(false), setChangePassword(false);
+                }}
               >
                 <Text style={styles.modalButtonText}>Cancel</Text>
               </TouchableOpacity>
@@ -267,6 +329,7 @@ const styles = StyleSheet.create({
     color: "#000000",
   },
   displayName: {
+    marginTop: 30,
     fontSize: 32,
     fontWeight: "bold",
     color: "#000000",
@@ -276,7 +339,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FF4040",
     padding: 15,
     borderRadius: 10,
-    marginBottom: 20,
+    marginBottom: 30,
     elevation: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },

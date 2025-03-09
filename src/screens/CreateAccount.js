@@ -7,9 +7,11 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import axios from "axios";
 import { backendIp } from "../../apiConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const CreateAccount = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -30,7 +32,7 @@ const CreateAccount = ({ navigation }) => {
         navigation.replace("MainApp"); // Navigate to MainApp if login is successful
       }
     } catch (error) {
-      console.log("error ", error);
+      console.log("error :", error);
       Alert.alert(
         "Signup Failed",
         error.response?.data?.error || "Something went wrong"
@@ -84,9 +86,14 @@ const CreateAccount = ({ navigation }) => {
       </View>
 
       <View style={styles.createAccountContainer}>
-        <Text style={styles.createAccountText}>Don't have an account yet?</Text>
-        <TouchableOpacity style={styles.createAccountButton}>
-          <Text style={styles.createAccountButtonText}>Create Account</Text>
+        <Text style={styles.createAccountText}>Already have an account?</Text>
+        <TouchableOpacity
+          style={styles.createAccountButton}
+          onPress={() => {
+            navigation.replace("Signup");
+          }}
+        >
+          <Text style={styles.createAccountButtonText}>Login</Text>
         </TouchableOpacity>
       </View>
     </View>
