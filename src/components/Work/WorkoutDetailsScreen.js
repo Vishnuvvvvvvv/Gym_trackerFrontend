@@ -12,7 +12,7 @@ import upperBody from "../../../assets/upperBodyPic.jpg";
 import lowerBody from "../../../assets/lowerBodyPic.webp";
 import Goback from "../../../assets/GoBack.png";
 import bicep from "../../../assets/bicep.jpg";
-import pushup from "../../../assets/pushup.webp";
+import pushup from "../../../assets/newpushup.webp";
 import squat from "../../../assets/squat.jpg";
 import lunges from "../../../assets/lunges.jpg";
 import CircledRight from "../../../assets/CircledRight.png";

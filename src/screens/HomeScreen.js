@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Vibration } from "react-native";
 import WorkoutPlanCard from "../components/HomeScreenComp/WorkoutPlanCard";
 import ExerciseCard from "../components/HomeScreenComp/ExerciseCard";
 import bicep from "../../assets/bicep.jpg";
-import pushup from "../../assets/pushup.webp";
+import pushup from "../../assets/newpushup.webp";
 import squat from "../../assets/squat.jpg";
 import lunges from "../../assets/lunges.jpg";
 import plank from "../../assets/plank.jpg";
