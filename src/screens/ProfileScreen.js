@@ -50,13 +50,14 @@ export default function ProfilePage({ navigation }) {
 
   // Function to handle Edit Profile
   const handleEditProfile = () => {
+    setChangePassword(false);
     setTempName(displayName); // Pre-fill with current name
     setModalVisible(true); // Show the modal
   };
 
   // Function to save the edited profile
   const save = async () => {
-    setChangePassword(!changePassword);
+    setChangePassword(false);
     try {
       const userToken = await AsyncStorage.getItem("authToken");
       let updatesMade = false;
